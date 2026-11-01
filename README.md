@@ -1,40 +1,37 @@
 # AERA Recovery — Samsung Galaxy A35 (SM-A356E)
 
-> **Status: bring-up scaffold — not build-ready and not tested on-device.** The vendor snapshot currently available in the companion repository is Android 13, not the Android 15 target firmware.
+> **Status: bring-up scaffold with kernel extracted; not yet build-ready for device testing and not tested on-device.**
 
 Initial device-tree workspace for bringing up [AERA Recovery](https://aera-recovery.com/) on the Samsung Galaxy A35 5G (Exynos 1380, device family `a35x`).
 
 ## Bring-up strategy
 
-1. Establish the AERA 16.0 build environment and confirm the upstream manifest/core revisions.
-2. Reuse the matching Android 15 stock firmware kernel image and its matching DTB/DTBO as the first boot-test baseline.
+1. Establish the AERA 16.0 build environment and confirm upstream manifest/core revisions.
+2. Use the supplied stock boot image as a kernel source and verify all companion firmware components match it.
 3. Adapt the device configuration to AERA's actual build interfaces; do not copy SHRP/TWRP-specific variables blindly.
 4. Validate boot, display, touch, ADB, USB, partition access and read-only data inspection.
-5. Investigate KeyMint, Gatekeeper and TEEGRIS compatibility separately. A successful recovery boot does **not** imply working FBE decryption.
+5. Investigate KeyMint, Gatekeeper and TEEGRIS compatibility separately. A successful recovery boot does not imply working FBE decryption.
 6. Build a custom kernel only if logs and controlled tests demonstrate that the stock-kernel baseline cannot meet the requirements.
 
-## Device facts currently carried forward
+## Current evidence
 
-- Device codename/family: `a35x`
-- Model target: `SM-A356E`
-- SoC: Samsung Exynos 1380
-- Platform identifier observed in the existing device tree: `s5e8835` / `erd8835`
-- Display: 1080 × 2340, portrait
-- Existing recovery-tree boot header setting: v3
-- Existing recovery-tree userdata filesystem declaration: F2FS
+- Device family: `a35x`; target model: `SM-A356E`.
+- SoC/platform carried forward from the existing device tree: Exynos 1380 / `s5e8835` / `erd8835`.
+- Supplied boot container: Android boot header v4, 4096-byte pages.
+- Extracted ARM64 kernel payload: 38,246,912 bytes.
+- Kernel SHA-256: `7617639544b7be8c8209cac9644553ba795e7b27d5f51cc0fad2505a976349e1`.
+- Supplied boot image ramdisk size: zero bytes.
+- Header `os_version` metadata decodes to Android 13.0.0 / April 2025; this alone does not establish the framework release of the full firmware package.
 
-These are starting references from existing A35 recovery work, **not yet validated as final AERA settings**. The companion vendor snapshot reports Android 13 build `A356EXXS7CZA4` (SDK 33, vendor SPL 2026-01-01), while the planned first test target is Android 15 build `A356EXXU4BYDC`. Do not treat its fstab/blobs as matching the Android 15 target.
+The kernel binary is not committed; place it locally at `prebuilt/Image`. Matching vendor_boot, DTBO, DTB provenance and the exact firmware fstab still need to be verified.
 
 ## Repository layout
 
-- `docs/` — bring-up plan, validation matrix and porting notes.
+- `docs/` — bring-up plan, firmware audit and build notes.
 - `kernel/` — kernel baseline notes and future reproducible build work.
-- `proprietary/` — extraction/manifest documentation only; proprietary Samsung binaries are not included.
+- `prebuilt/` — instructions for local, non-committed firmware binaries.
+- `proprietary/` — extraction/manifest documentation only.
 - `recovery/root/` — device-specific recovery-side additions, if required.
-
-## Build status
-
-No flashable image is provided by this initial scaffold. Build configuration, fstab, init scripts, kernel packaging and AERA product integration must be completed and reviewed before attempting a build or flash.
 
 ## Safety
 
@@ -44,10 +41,4 @@ No flashable image is provided by this initial scaffold. Build configuration, fs
 - Never mix kernel, DTB, DTBO or vendor modules from unrelated firmware builds.
 - Do not commit proprietary Samsung blobs unless redistribution is explicitly authorized.
 
-## Upstream
-
-- AERA documentation: https://aera-recovery.com/wiki/
-- AERA manifest: https://github.com/AERA-Recovery/android_manifest
-- AERA recovery core: https://github.com/AERA-Recovery/android_bootable_recovery
-
-This repository is an independent AERA porting effort. The existing SHRP project remains separate.
+The existing SHRP project remains separate from this AERA port.
