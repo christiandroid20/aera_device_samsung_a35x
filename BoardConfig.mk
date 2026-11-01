@@ -30,13 +30,15 @@ TARGET_NO_RADIOIMAGE := true
 TARGET_USES_UEFI := true
 TARGET_USES_64_BIT_BINDER := true
 
-# Kernel baseline: Android 15 stock SM-A356E firmware.
-# The files must be extracted from ONE matching firmware build and placed in
-# device/samsung/a35x/prebuilt/. The current legacy Image placeholder is empty.
+# Kernel baseline: extracted from the supplied SM-A356E boot.img.
+# Audited container: A356EXXU4BYDC, Android boot header v4, 4096-byte pages.
+# The header's os_version field encodes 13.0.0 / 2025-04; this metadata alone
+# does not establish the Android framework/vendor release of the full firmware.
+# Keep all proprietary firmware binaries local; do not commit without permission.
 TARGET_KERNEL_ARCH := arm64
 TARGET_KERNEL_HEADER_ARCH := arm64
 BOARD_KERNEL_IMAGE_NAME := Image
-BOARD_BOOT_HEADER_VERSION := 3
+BOARD_BOOT_HEADER_VERSION := 4
 BOARD_KERNEL_PAGESIZE := 4096
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/Image
 TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
@@ -44,11 +46,12 @@ BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
 BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
 
-# Dedicated recovery partition (value carried over from the existing A35 tree;
-# must be rechecked against the exact target firmware before image packaging).
+# Dedicated recovery partition (carried over from the existing A35 tree).
+# MUST be confirmed against the exact SM-A356E partition map before packaging.
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 100663296
 
-# Dynamic partitions — values carried over from the existing A35 tree.
+# Dynamic partitions — carried over from the existing A35 tree; verify against
+# the target firmware's super partition metadata before device testing.
 BOARD_SUPER_PARTITION_SIZE := 9126805504
 BOARD_SUPER_PARTITION_GROUPS := samsung_dynamic_partitions
 BOARD_SAMSUNG_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor odm vendor_dlkm system_dlkm
