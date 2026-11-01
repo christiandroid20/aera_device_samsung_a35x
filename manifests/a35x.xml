@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+    <remote name="github" fetch="https://github.com/" />
+    <project name="christiandroid20/aera_device_samsung_a35x"
+             path="device/samsung/a35x"
+             remote="github"
+             revision="aera-16.0-bringup" />
+    <project name="christiandroid20/vendor_samsung_a35x"
+             path="vendor/samsung/a35x"
+             remote="github"
+             revision="main" />
+</manifest>
