@@ -20,8 +20,11 @@ generated makefiles are not yet inherited by the recovery product.
 
 ## 3. Supply the Android 15 stock kernel
 
-Extract `Image`, `dtb.img` and `dtbo.img` from one exact SM-A356E Android 15
-firmware build and place them in `device/samsung/a35x/prebuilt/`.
+Extract `Image`, `dtb.img` and `dtbo.img` from the exact SM-A356E Android 15
+firmware build `A356EXXU4BYDC` (or the exact Android 15 build actually installed)
+and place them in `device/samsung/a35x/prebuilt/`. Extract the matching Android 15
+`fstab.s5e8835` as well; the current recovery fstab is only a provisional
+Android 13-derived draft.
 
 The current legacy `prebuilt/Image` placeholder is zero bytes and must be
 replaced locally. Record the firmware build ID and hashes before compiling.
@@ -40,7 +43,7 @@ image header and partition target, then test boot with a known-good return path.
 
 ## Current limitations
 
-- The recovery fstab is an initial firmware-derived read-only bring-up version.
+- The recovery fstab is provisional and derived from the mismatched Android 13 vendor snapshot; replace/revalidate it against Android 15 before building a test image.
 - Kernel packaging offsets and exact recovery placement still require
   confirmation from the target firmware.
 - The vendor repository has not yet been converted into a minimal AERA
