@@ -1,10 +1,12 @@
 # Samsung Galaxy A35 SM-A356E — initial AERA recovery fstab
-# Sources: vendor_samsung_a35x/proprietary/vendor/etc/fstab.s5e8835
-# and the existing android_device_samsung_a35x recovery tree.
+# PROVISIONAL ONLY. The source vendor_samsung_a35x/proprietary/vendor/etc/fstab.s5e8835
+# belongs to Android 13 build A356EXXS7CZA4 (SDK 33), not the planned Android 15
+# baseline A356EXXU4BYDC. Re-extract/reconcile this file against the exact Android 15
+# firmware before building or testing a recovery image.
 #
-# This is a bring-up fstab, not a declaration that all filesystems or
-# encryption paths have been validated in AERA. Data is deliberately marked
-# read-only for the first boot/inspection stage. Do not add formattable flags.
+# This is a temporary draft, not a verified Android 15 fstab. All entries must
+# be checked against the target Android 15 firmware. Data is deliberately marked
+# read-only for first inspection. Do not flash/test this draft on userdata.
 
 # Dynamic logical partitions. Firmware fstab lists these filesystem variants.
 system          /system          erofs   ro    wait,logical
