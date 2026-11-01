@@ -94,7 +94,29 @@ A compile-only smoke test can be used earlier to expose product/Soong errors,
 but it must not be treated as a valid device image while required prebuilt
 inputs or fstab remain provisional. Do not flash such an image.
 
-## 6. Bring-up gates
+## 6. Local preflight
+
+After copying the extracted kernel to `prebuilt/Image` and adding the matching
+`dtb.img` and `dtbo.img`, run:
+
+```bash
+bash tools/preflight.sh --compile-only
+```
+
+This checks the three local prebuilt files and verifies the kernel SHA-256.
+It warns that the current fstab is provisional and that the resulting build
+must not be flashed or booted.
+
+After the matching firmware fstab and vendor_boot audit are complete, run:
+
+```bash
+bash tools/preflight.sh --device-test
+```
+
+This is only a file/provenance gate, not a substitute for image-header,
+partition-size, DTB compatibility or hardware validation.
+
+## 7. Bring-up gates
 
 1. Build-system/product configuration resolves without missing target errors.
 2. Recovery image packaging uses the verified boot header and partition
