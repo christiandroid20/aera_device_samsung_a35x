@@ -3,6 +3,16 @@
 Source repository: https://github.com/christiandroid20/vendor_samsung_a35x
 Branch inspected: `main`
 
+## Firmware provenance warning
+
+The tracked `proprietary/vendor/build.prop` reports:
+- fingerprint: `samsung/a35xjvxx/a35x:13/TP1A.220624.014/A356EXXS7CZA4:user/release-keys`;
+- incremental: `A356EXXS7CZA4`;
+- Android release / SDK: `13` / `33`;
+- vendor security patch: `2026-01-01`.
+
+This does **not** match the planned Android 15 baseline `A356EXXU4BYDC`. Therefore this vendor snapshot must not be treated as the Android 15 vendor source, and its fstab/KeyMint/Gatekeeper components must not be mixed into the Android 15 test build without a deliberate compatibility audit.
+
 ## Confirmed useful source data
 
 - `proprietary/vendor/etc/fstab.s5e8835` identifies the A35 storage layout.
@@ -29,4 +39,4 @@ For that reason, this AERA device product does not blindly inherit the vendor ma
 5. Integrate only required, redistributable files into the recovery ramdisk.
 6. Test decryption separately from recovery boot and never format userdata as a troubleshooting step.
 
-The first AERA milestone is boot/display/touch/ADB and safe read-only partition inspection. FBE decryption remains a separate unverified milestone.
+The first AERA milestone is boot/display/touch/ADB and safe read-only partition inspection. Before the Android 15 test image, replace the provisional recovery fstab and obtain matching firmware inputs. FBE decryption remains a separate unverified milestone.
