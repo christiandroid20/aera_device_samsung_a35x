@@ -1,6 +1,6 @@
 # AERA Recovery — Samsung Galaxy A35 (SM-A356E)
 
-> **Status: bring-up scaffold — not build-ready and not tested on-device.**
+> **Status: bring-up scaffold — not build-ready and not tested on-device.** The vendor snapshot currently available in the companion repository is Android 13, not the Android 15 target firmware.
 
 Initial device-tree workspace for bringing up [AERA Recovery](https://aera-recovery.com/) on the Samsung Galaxy A35 5G (Exynos 1380, device family `a35x`).
 
@@ -23,7 +23,7 @@ Initial device-tree workspace for bringing up [AERA Recovery](https://aera-recov
 - Existing recovery-tree boot header setting: v3
 - Existing recovery-tree userdata filesystem declaration: F2FS
 
-These are starting references from the existing A35 recovery work, **not yet validated as final AERA settings**. Re-check against the exact firmware and AERA build requirements before producing an image.
+These are starting references from existing A35 recovery work, **not yet validated as final AERA settings**. The companion vendor snapshot reports Android 13 build `A356EXXS7CZA4` (SDK 33, vendor SPL 2026-01-01), while the planned first test target is Android 15 build `A356EXXU4BYDC`. Do not treat its fstab/blobs as matching the Android 15 target.
 
 ## Repository layout
 
