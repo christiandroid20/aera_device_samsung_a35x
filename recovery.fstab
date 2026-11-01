@@ -1,0 +1,35 @@
+# Samsung Galaxy A35 SM-A356E — initial AERA recovery fstab
+# Sources: vendor_samsung_a35x/proprietary/vendor/etc/fstab.s5e8835
+# and the existing android_device_samsung_a35x recovery tree.
+#
+# This is a bring-up fstab, not a declaration that all filesystems or
+# encryption paths have been validated in AERA. Data is deliberately marked
+# read-only for the first boot/inspection stage. Do not add formattable flags.
+
+# Dynamic logical partitions. Firmware fstab lists these filesystem variants.
+system          /system          erofs   ro    wait,logical
+system          /system          f2fs    ro    wait,logical
+system          /system          ext4    ro    wait,logical
+vendor          /vendor          erofs   ro    wait,logical
+system_dlkm     /system_dlkm     erofs   ro    wait,logical
+system_dlkm     /system_dlkm     f2fs    ro    wait,logical
+system_dlkm     /system_dlkm     ext4    ro    wait,logical
+vendor_dlkm     /vendor_dlkm     erofs   ro    wait,logical
+product         /product         erofs   ro    wait,logical
+odm             /odm             erofs   ro    wait,logical
+
+# Physical partitions
+/dev/block/by-name/metadata      /metadata       ext4   ro,noatime,nosuid,nodev   wait
+/dev/block/by-name/userdata      /data           f2fs   ro,noatime,nosuid,nodev,discard,usrquota,grpquota,fsync_mode=nobarrier,reserve_root=32768,resgid=5678,inlinecrypt   latemount,wait,quota,reservedsize=128M,fscompress,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0,metadata_encryption=aes-256-xts:wrappedkey_v0,keydirectory=/metadata/vold/metadata_encryption
+
+# Raw flashable partitions. These entries expose the partitions to recovery;
+# their exact backup/flash behavior must be checked on the device.
+/dev/block/by-name/boot          /boot           emmc   defaults   defaults
+/dev/block/by-name/init_boot     /init_boot      emmc   defaults   defaults
+/dev/block/by-name/vendor_boot  /vendor_boot    emmc   defaults   defaults
+/dev/block/by-name/dtbo          /dtbo           emmc   defaults   defaults
+/dev/block/by-name/vbmeta        /vbmeta         emmc   defaults   defaults
+/dev/block/by-name/vbmeta_system /vbmeta_system  emmc   defaults   defaults
+/dev/block/by-name/recovery      /recovery       emmc   defaults   defaults
+/dev/block/by-name/misc          /misc           emmc   defaults   defaults
+/dev/block/by-name/efs           /efs            emmc   defaults   defaults
