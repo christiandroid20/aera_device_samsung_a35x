@@ -55,19 +55,7 @@ Two device-specific Host API 2 apps are in prototype form:
 - **GSI MANAGER** — image format/size/SHA-256 inspection, physical/logical partition inventory, Samsung compatibility properties, snapshot discovery and read-only boot status.
 - **EMERGENCY MODE** — boot reason/build properties, pstore evidence, filesystem mount/free-space state, TEE/decryption status and recovery-log presence.
 
-The apps are packaged as local AERA plugins and copied into AERA's RAM plugin registry after its `/tmp` tmpfs is mounted. AERA marks local unsigned packages as **Unofficial**; the project's signing/trust policy is not changed.
-
-Both apps currently run as root but contain only read-only inspection logic. ROM customization, GApps injection, EROFS/EXT4 rebuilding, snapshot creation/restoration, boot patching, automatic rollback, automatic reboot-to-recovery, format and wipe operations are not implemented. The existing AERA Root Manager remains separate.
-
-Build the plugin payloads before building the recovery image:
-
-```sh
-export AERA_BUILD_DEVICE=a35x
-source build/envsetup.sh
-bash device/samsung/a35x/plugins/build_plugins.sh
-lunch twrp_a35x-bp2a-eng
-m -j2 recoveryimage
-```
+These are source prototypes only and are **not included in the first recovery image**. Their init-time registration and payload packaging are deliberately disabled until the native plugin payloads have been built and validated. Both apps remain pending; the first build focuses on AERA recovery boot, display, touch, USB/ADB, storage and crypto startup. The existing AERA Root Manager remains separate.
 
 ## Required validation before any device test
 
