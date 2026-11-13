@@ -300,6 +300,7 @@ static void render_image_result(const char *path) {
             format_bytes(sparse_bytes, value, sizeof(value));
             add_metric(&p, "Expanded sparse size", value, 0);
         }
+        send_message(SET_STATUS, 0, 0, 0, "", "Calculating SHA-256; large images may take a while.");
         if (sha256_file(path, hash, sizeof(hash)))
             add_metric(&p, "SHA-256", hash, METRIC_GOOD);
         else
@@ -315,15 +316,19 @@ static void scan_partitions(struct Page *p, const char *dir, const char *section
     struct dirent *entry; unsigned count = 0;
     while ((entry = readdir(d)) && p->row_count < MAX_ROWS - 1 && count < 30) {
         if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) continue;
-        char path[512], target[256], size_text[64];
+        char path[512], target[256], size_text[256];
         snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
         uint64_t bytes = 0;
         if (!file_size(path, &bytes)) continue;
         format_bytes(bytes, size_text, sizeof(size_text));
         ssize_t n = readlink(path, target, sizeof(target) - 1);
         if (n >= 0) target[n] = 0; else copy_text(target, sizeof(target), "block device");
-        snprintf(size_text + strlen(size_text), sizeof(size_text) - strlen(size_text),
-                 " · %s", target);
+        size_t used = strlen(size_text);
+        if (used + 3 < sizeof(size_text)) {
+            strncat(size_text, " · ", sizeof(size_text) - used - 1);
+            used = strlen(size_text);
+            strncat(size_text, target, sizeof(size_text) - used - 1);
+        }
         add_metric(p, entry->d_name, size_text, 0); ++count;
     }
     if (!count) add_metric(p, "Status", "No readable entries found", METRIC_WARNING);
@@ -360,7 +365,8 @@ static void render_compat(void) {
     metric_prop(&p, "KeyMint", "init.svc.vendor.keymint-default");
     metric_prop(&p, "Gatekeeper", "init.svc.vendor.gatekeeper-1-0");
     metric_prop(&p, "FKeymaster", "init.svc.vendor.fkeymaster-default");
-    add_metric(&p, "Real vendor dm-4 mounted", real_vendor_dm4_mounted() ? "Yes" : "No / not verified", real_vendor_dm4_mounted() ? METRIC_GOOD : METRIC_WARNING);
+    int vendor_dm4 = real_vendor_dm4_mounted();
+    add_metric(&p, "Real vendor dm-4 mounted", vendor_dm4 ? "Yes" : "No / not verified", vendor_dm4 ? METRIC_GOOD : METRIC_WARNING);
     add_back(&p); publish_page(&p);
 }
 static void render_snapshots(void) {
@@ -371,7 +377,7 @@ static void render_snapshots(void) {
         "/data/media/0/AERA/GSI", "/data/media/0/AERA/Snapshots"
     };
     for (size_t i = 0; i < sizeof(paths)/sizeof(paths[0]); ++i) {
-        struct stat st; char value[128];
+        struct stat st; char value[384];
         if (stat(paths[i], &st) == 0 && S_ISDIR(st.st_mode))
             snprintf(value, sizeof(value), "Directory present · %s", paths[i]);
         else
@@ -412,7 +418,7 @@ static void render_emergency_home(void) {
     add_action(&p, 130, "Filesystem health", "Check mount state and free space without modifying files", 0);
     add_action(&p, 140, "TEE & decryption status", "Inspect TEEGRIS, KeyMint, Gatekeeper and FKeymaster state", 0);
     add_action(&p, 150, "ROM snapshots", "Find available recovery points; no restore is triggered", 0);
-    add_action(&p, 160, "Recovery logs", "Inspect recent recovery log evidence", 0);
+    add_action(&p, 160, "Recovery logs", "Check recovery log availability and file sizes", 0);
     add_action(&p, 170, "Automatic rollback", "Not enabled: bootloader / early-boot trigger is not yet proven", DISABLED);
  publish_page(&p);
 }
@@ -487,7 +493,7 @@ static void render_crypto(void) {
 }
 static void render_logs(void) {
     struct Page p; page_init(&p, "RECOVERY LOGS",
-        "Read-only log presence and recent tail. Export and repair actions are not enabled.");
+        "Read-only log availability and file sizes. Export and repair actions are not enabled.");
     const char *logs[] = {"/tmp/recovery.log", "/cache/recovery/last_log", "/sys/fs/pstore/console-ramoops"};
     for (size_t i = 0; i < sizeof(logs)/sizeof(logs[0]); ++i) {
         uint64_t bytes = 0; char value[128];
