@@ -1,5 +1,7 @@
 on init
     setprop sys.usb.configfs 0
+    # A35X recovery property observed in the previous working TWRP session.
+    setprop sys.usb.controller 13200000.dwc3
 
     mkdir /config
     mount configfs none /config
