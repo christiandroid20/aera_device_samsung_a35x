@@ -34,7 +34,7 @@ build_one() {
     local stage="$WORK/$id/stage"
     local packed="$WORK/$id/packed"
     local output="$DEVICE_ROOT/recovery/root/system/etc/aera/plugins/$id"
-    mkdir -p "$stage/usr/bin" "$packed" "$output"
+    mkdir -p "$stage/usr/bin" "$packed"
 
     "$CLANG" \
         --target=aarch64-unknown-linux-musl \
@@ -53,6 +53,8 @@ build_one() {
     chmod 0755 "$stage/usr/bin/aera-plugin"
     python3 "$PLUGIN_ROOT/pack.py" "$stage" "$packed"
 
+    rm -rf "$output"
+    mkdir -p "$output"
     python3 - "$PLUGIN_ROOT/$id/plugin.json" "$packed/metadata.json" "$output/plugin.json" <<'PY'
 import json
 from pathlib import Path
@@ -70,6 +72,20 @@ Path(sys.argv[3]).write_text(json.dumps(source, ensure_ascii=False, indent=2) + 
 PY
     install -m 0444 "$packed/runtime.xz" "$output/runtime.xz"
     chmod 0444 "$output/plugin.json"
+    python3 - "$output" <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import sys
+root = Path(sys.argv[1])
+manifest = json.loads((root / "plugin.json").read_text())
+payload = root / manifest["payload"]
+data = payload.read_bytes()
+assert len(data) == manifest["payload_size"], "payload size mismatch"
+assert hashlib.sha256(data).hexdigest() == manifest["payload_sha256"], "payload SHA-256 mismatch"
+assert manifest["expanded_size"] > 0 and manifest["member_count"] > 0
+print(f"Verified {manifest['id']}: {len(data)} bytes, SHA-256 OK")
+PY
     echo "Prepared AERA RAM plugin: $output"
 }
 
