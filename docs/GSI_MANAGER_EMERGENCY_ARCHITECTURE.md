@@ -117,7 +117,7 @@ The current AERA fstab matches the separate AERA16 A35X reference and deliberate
 
 The original AERA fstab had two removable-storage entries in the wrong source/mount-point order. Prior A35X recovery logs confirmed that the old `external_sd` line was parsed as an invalid block device, and the previous working TWRP flags identified the actual removable sources. The work branch now uses:
 
-- `/dev/block/mmcblk0p1 /external_sd vfat ...` for the microSD card.
+- `/dev/block/mmcblk0p1 /external_sd auto ...` for the microSD card, matching the previous TWRP removable-media definition.
 - `/dev/block/sdf1 /usb-otg auto ...` for the USB-OTG device.
 
 Neither entry uses a blocking `wait` flag, so missing removable media cannot hold recovery startup. These are based on the prior A35X recovery observations and still need a mount test in the AERA image. The AERA fstab does not declare `keydata` or `keyrefuge`; do not add guessed partition names without a verified PIT/by-name listing.
