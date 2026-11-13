@@ -1,16 +1,30 @@
 on property:ro.crypto.state=encrypted && property:ro.crypto.type=file
     install_keyring
 
+# /dev/block/by-name is prepared by init.recovery.s5e8835.rc before this file
+# is imported. These mounts are deliberately non-blocking: a missing EFS node
+# must not prevent the recovery UI or ADB from starting.
 on fs
-    wait /dev/block/by-name/efs
     mount ext4 /dev/block/by-name/efs /mnt/vendor/efs nosuid nodev noatime noauto_da_alloc,discard,journal_checksum,data=ordered,errors=panic
-    wait /dev/block/by-name/sec_efs
     mount ext4 /dev/block/by-name/sec_efs /efs nosuid nodev noatime noauto_da_alloc,discard,journal_checksum,data=ordered,errors=panic
     mkdir /dev/socket/iwt 0770 system system
     mkdir /dev/socket/iwt/ca 0770 system system
 
-# Secuencia TEEGRIS por eventos (sin wait_for_prop): si un daemon nunca
-# llega a Ready, init no se bloquea y el recovery/ADB siguen arrancando.
+# Preserve the vendor KeyMint setup actions without importing the stock
+# service rc files, which started KeyMint/Gatekeeper before TEEGRIS was ready.
+on post-fs
+    mkdir /mnt/vendor/efs/DAK 0775 system system
+    restorecon --recursive --force /mnt/vendor/efs/DAK
+    chown system system /mnt/vendor/efs/DAK/gakkeybox
+    chmod 0644 /mnt/vendor/efs/DAK/gakkeybox
+
+on post-fs-data
+    mkdir /data/vendor/tee 0700 system system
+    mkdir /data/vendor/keymaster 0775 system system
+    mkdir /data/vendor/gatekeeper 0770 system system
+
+# Start secure-world services only after the real vendor TAs have been
+# validated and the previous daemon has reported readiness.
 on property:hwservicemanager.ready=true && property:crypto.ready=1
     start tz_service
 
@@ -19,8 +33,6 @@ on property:vendor.tzdaemon=Ready
     write /proc/iccc_ready 1
     start tzts_service
 
-# KeyMint, Gatekeeper y FKeymaster dependen de que TEEGRIS/TEE-TS
-# hayan terminado su inicialización.
 on property:vendor.tzts_daemon=Ready
     start vendor.keymint-default
     start vendor.gatekeeper-1-0
@@ -36,6 +48,7 @@ on property:twrp.all.users.decrypted=true
     umount /efs
 
 service tz_service /vendor/bin/tzdaemon
+    override
     user system
     group system readproc
     setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib:/system/lib64:/system/lib:/sbin
@@ -43,6 +56,7 @@ service tz_service /vendor/bin/tzdaemon
     seclabel u:r:recovery:s0
 
 service tzts_service /vendor/bin/tzts_daemon
+    override
     user system
     group system
     setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib:/system/lib64:/system/lib:/sbin
@@ -50,6 +64,7 @@ service tzts_service /vendor/bin/tzts_daemon
     seclabel u:r:recovery:s0
 
 service vendor.keymint-default /vendor/bin/hw/android.hardware.security.keymint-service
+    override
     user system
     group system drmrpc
     setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib:/system/lib64:/system/lib:/sbin
@@ -57,9 +72,19 @@ service vendor.keymint-default /vendor/bin/hw/android.hardware.security.keymint-
     seclabel u:r:recovery:s0
 
 service vendor.gatekeeper-1-0 /vendor/bin/hw/android.hardware.gatekeeper@1.0-service
+    override
     interface android.hardware.gatekeeper@1.0::IGatekeeper default
     user system
     group system 5678
+    setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib:/system/lib64:/system/lib:/sbin
+    disabled
+    seclabel u:r:recovery:s0
+
+service vendor.fkeymaster-default /vendor/bin/vendor.samsung.hardware.security.fkeymaster-service
+    override
+    interface aidl vendor.samsung.hardware.security.fkeymaster.ISehFkeymaster/default
+    user system
+    group system
     setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib:/system/lib64:/system/lib:/sbin
     disabled
     seclabel u:r:recovery:s0
