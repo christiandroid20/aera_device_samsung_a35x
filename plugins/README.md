@@ -21,11 +21,7 @@ m -j2 recoveryimage
 
 The script uses AERA's AArch64 musl sysroot and Clang prebuilts. Set `AERA_TREE`, `AERA_CLANG` or `AERA_BUILTINS` only when the checkout uses a non-default location.
 
-The generated runtime payloads and finalized manifests are staged into:
-
-`recovery/root/system/etc/aera/plugins/{gsi-manager,emergency-mode}/`
-
-A device init action copies these files into `/tmp/aera/plugins/` after AERA mounts its tmpfs. The AERA Home plugin grid then discovers the two device-specific apps. Local packages without the AERA project signature are marked **Unofficial** by AERA; this implementation does not alter the project's signing key or trust policy.
+**Pending for a later stage:** runtime payload generation, system image packaging and init-time registration are not currently wired into the first AERA recovery build. The init copy action is intentionally disabled until both plugin binaries and manifests are validated. Local package trust/signing policy will remain unchanged.
 
 ## Compatibility and limitations
 
