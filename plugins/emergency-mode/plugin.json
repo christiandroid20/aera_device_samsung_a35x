@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "id": "emergency-mode",
+  "name": "EMERGENCY MODE",
+  "version": "0.1.0",
+  "description": "A35X boot-failure evidence and recovery diagnostics. No automatic wipe, rollback or boot-chain changes.",
+  "type": "ui-runtime",
+  "entry": "main",
+  "min_host_api": 2,
+  "protocol_version": 2,
+  "executable": "usr/bin/aera-plugin",
+  "icon": "info",
+  "payload": "runtime.xz",
+  "payload_size": 1,
+  "payload_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "expanded_size": 1,
+  "expanded_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "member_count": 1,
+  "permissions": [
+    "display",
+    "touch-input"
+  ]
+}
