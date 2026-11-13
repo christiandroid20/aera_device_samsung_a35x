@@ -123,3 +123,6 @@ The original AERA fstab had two removable-storage entries in the wrong source/mo
 Neither entry uses a blocking `wait` flag, so missing removable media cannot hold recovery startup. These are based on the prior A35X recovery observations and still need a mount test in the AERA image. The AERA fstab does not declare `keydata` or `keyrefuge`; do not add guessed partition names without a verified PIT/by-name listing.
 
 The TEE init intentionally creates the standard KeyMint/TEE runtime directories under `/data/vendor` and the EFS DAK directory, then applies their expected ownership/contexts. These are narrowly scoped vendor-service setup operations; they are not a userdata format, wipe or image restore. The GSI/Emergency plugin workers themselves remain read-only.
+
+
+The A35X USB gadget controller is explicitly set to `13200000.dwc3` in the replacement USB RC, matching the value observed in the prior recovery property dump. ADB/MTP/fastbootd still require independent testing in the AERA image.
