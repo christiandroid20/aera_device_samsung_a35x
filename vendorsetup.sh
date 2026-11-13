@@ -1,28 +1,33 @@
 #
-# Copyright (C) 2024 The Android Open Source Project
-# Copyright (C) 2024 The TWRP Open Source Project
-#
+# Galaxy A35 5G (a35x) — AERA Recovery 16.0 packaging options
 # SPDX-License-Identifier: Apache-2.0
 #
-
-# Según el wiki de AERA: AERA_BUILD_DEVICE se exporta en el shell que llama,
-# ANTES de `source build/envsetup.sh` (nunca dentro de este bloque), y las
-# opciones de empaquetado van en exports con guardia para que no se filtren
-# a otros árboles:
-#
-#   export AERA_BUILD_DEVICE=a35x
-#   source build/envsetup.sh
-#   lunch twrp_a35x-bp2a-eng
-#   m -j2 recoveryimage
+# Export AERA_BUILD_DEVICE=a35x before sourcing build/envsetup.sh.
 
 if [ "$AERA_BUILD_DEVICE" = "a35x" ]; then
-    export ALLOW_MISSING_DEPENDENCIES=true
+    export LC_ALL="C"
+    export AERA_PRODUCT_PREFIX=AERA
+    export AERA_BUILD_STATUS=Unofficial
+    export AERA_BUILD_TYPE=Beta
+    export AERA_VANILLA_BUILD=1
 
-    # Descifrado de /data (necesita además fstab correcto y KeyMint/gatekeeper
-    # compatibles; el flag solo no descifra nada).
-    export AERA_INCLUDE_CRYPTO=true
+    export AERA_USE_TAR_BINARY=1
+    export AERA_USE_SED_BINARY=1
+    export AERA_USE_LZ4_BINARY=1
+    export AERA_USE_ZSTD_BINARY=1
+    export AERA_USE_DATE_BINARY=1
+    export AERA_USE_GREP_BINARY=1
+    export AERA_USE_BUSYBOX_BINARY=1
+    export AERA_USE_XZ_UTILS=1
+    export AERA_USE_UPDATED_MAGISKBOOT=1
+    export AERA_DELETE_MAGISK_ADDON=1
+    export AERA_USE_FSCK_EROFS_BINARY=1
+    export AERA_USE_PATCHELF_BINARY=1
+    export AERA_USE_DMSETUP=1
 
-    # Opciones NO activadas a propósito (el árbol no trae los drivers/firmware):
-    #   AERA_ENABLE_WLAN, AERA_ENABLE_MOBILE_DATA, AERA_ENABLE_ROOT_MANAGER,
-    #   AERA_ENABLE_ABL_PRESERVATION
+    export AERA_SETTINGS_ROOT_DIRECTORY=/data/recovery
+    export AERA_MISCELLANEOUS_ROOT_DIRECTORY=/sdcard
+
+    # Requested existing AERA Root Manager; do not add a second root menu.
+    export AERA_ENABLE_ROOT_MANAGER=1
 fi
