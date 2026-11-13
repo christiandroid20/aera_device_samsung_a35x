@@ -75,7 +75,6 @@ struct Page {
 };
 static uint32_t host_features;
 static int app_fd = 4;
-static int current_page = PAGE_HOME;
 static const uint32_t BACK_ACTION = 999;
 static const uint32_t PICKER_REQUEST = 901;
 
@@ -178,8 +177,8 @@ static void append_body(char *body, size_t size, const char *line) {
     snprintf(body + used, size - used, "%s\n", line);
 }
 static int publish_page(const struct Page *p) {
-    if (send_message(BEGIN_PAGE, 0, 0, 0, p->title, p->body)) return -1;
     if (host_features & FEATURE_METRICS) {
+        if (send_message(BEGIN_PAGE, 0, 0, 0, p->title, p->body)) return -1;
         for (size_t i = 0; i < p->row_count; ++i) {
             const struct Row *r = &p->rows[i];
             if (send_message(r->section ? ADD_SECTION : ADD_METRIC,
@@ -224,6 +223,19 @@ static int file_size(const char *path, uint64_t *size) {
     close(fd);
     if (ok) *size = bytes;
     return ok;
+}
+static int real_vendor_dm4_mounted(void) {
+    FILE *f = fopen("/proc/self/mountinfo", "r");
+    if (!f) return 0;
+    char line[1024], device[64], mountpoint[256];
+    int found = 0;
+    while (fgets(line, sizeof(line), f)) {
+        if (sscanf(line, "%*s %*s %63s %*s %255s", device, mountpoint) == 2 &&
+            strcmp(device, "254:4") == 0 && strcmp(mountpoint, "/vendor") == 0) {
+            found = 1; break;
+        }
+    }
+    fclose(f); return found;
 }
 static int mount_present(const char *mountpoint) {
     FILE *f = fopen("/proc/mounts", "r");
@@ -348,7 +360,7 @@ static void render_compat(void) {
     metric_prop(&p, "KeyMint", "init.svc.vendor.keymint-default");
     metric_prop(&p, "Gatekeeper", "init.svc.vendor.gatekeeper-1-0");
     metric_prop(&p, "FKeymaster", "init.svc.vendor.fkeymaster-default");
-    add_metric(&p, "Real vendor dm-4 mounted", mount_present("/vendor") ? "Mounted (confirm dm-4 in mountinfo)" : "Not mounted", mount_present("/vendor") ? METRIC_GOOD : METRIC_WARNING);
+    add_metric(&p, "Real vendor dm-4 mounted", real_vendor_dm4_mounted() ? "Yes" : "No / not verified", real_vendor_dm4_mounted() ? METRIC_GOOD : METRIC_WARNING);
     add_back(&p); current_page = PAGE_COMPAT; publish_page(&p);
 }
 static void render_snapshots(void) {
@@ -390,7 +402,7 @@ static void render_gsi_home(void) {
     add_action(&p, 50, "Root & boot inspection", "Read-only boot status; existing Root Manager remains separate", 0);
     add_action(&p, 60, "ROM customization", "Staging, GApps injection and filesystem conversion are not enabled yet", DISABLED);
     add_action(&p, 70, "ROM builder & export", "Image rebuild and package export are not enabled yet", DISABLED);
-    current_page = PAGE_HOME; publish_page(&p);
+ publish_page(&p);
 }
 static void render_emergency_home(void) {
     struct Page p; page_init(&p, "EMERGENCY MODE",
@@ -402,7 +414,7 @@ static void render_emergency_home(void) {
     add_action(&p, 150, "ROM snapshots", "Find available recovery points; no restore is triggered", 0);
     add_action(&p, 160, "Recovery logs", "Inspect recent recovery log evidence", 0);
     add_action(&p, 170, "Automatic rollback", "Not enabled: bootloader / early-boot trigger is not yet proven", DISABLED);
-    current_page = PAGE_HOME; publish_page(&p);
+ publish_page(&p);
 }
 static void render_boot_reason(void) {
     struct Page p; page_init(&p, "BOOT REASON & BUILD",
