@@ -35,18 +35,5 @@ service extract_ta /sbin/extract_ta.sh
 # Evita que el wait de efs/sec_efs se ejecute antes de crear los symlinks.
 import /init.recovery.teegris.rc
 
-# AERA Host API 2 device plugins. /tmp is a tmpfs created by AERA's init.rc,
-# so seed the RAM plugin registry after post-fs-data and before the UI starts.
-on post-fs-data
-    mkdir /tmp/aera 0700 root root
-    mkdir /tmp/aera/plugins 0700 root root
-    mkdir /tmp/aera/plugins/gsi-manager 0700 root root
-    copy /system/etc/aera/plugins/gsi-manager/plugin.json /tmp/aera/plugins/gsi-manager/plugin.json
-    copy /system/etc/aera/plugins/gsi-manager/runtime.xz /tmp/aera/plugins/gsi-manager/runtime.xz
-    chmod 0444 /tmp/aera/plugins/gsi-manager/plugin.json
-    chmod 0444 /tmp/aera/plugins/gsi-manager/runtime.xz
-    mkdir /tmp/aera/plugins/emergency-mode 0700 root root
-    copy /system/etc/aera/plugins/emergency-mode/plugin.json /tmp/aera/plugins/emergency-mode/plugin.json
-    copy /system/etc/aera/plugins/emergency-mode/runtime.xz /tmp/aera/plugins/emergency-mode/runtime.xz
-    chmod 0444 /tmp/aera/plugins/emergency-mode/plugin.json
-    chmod 0444 /tmp/aera/plugins/emergency-mode/runtime.xz
+# GSI MANAGER and EMERGENCY MODE runtime staging is intentionally pending.
+# Do not register plugins until their payloads are included in the recovery build.
