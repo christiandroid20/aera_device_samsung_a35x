@@ -37,6 +37,7 @@ The 4 KiB page size and header v2 are retained as the A35X baseline. The TeamWin
 - Kept `PRODUCT_TARGET_VNDK_VERSION := 33` provisional until the installed vendor's actual `ro.vndk.version` is checked.
 - Removed the fake 2099 security-patch placeholder. The 2025-04-01 patch value remains in vendor.prop because Samsung's U4BYDC release listing reports that security patch level; verify the mounted vendor's own patch property before finalizing.
 - Enabled AERA's existing Root Manager using the device-specific packaging flag. No duplicate Root Manager entry is added.
+- Corrected the removable-storage fstab source/mount-point order for the observed A35X microSD and USB-OTG block devices, and set the known A35X USB gadget controller (`13200000.dwc3`). These still need an AERA mount/ADB test.
 - Kept the A35X dynamic partition map, including `system_dlkm`.
 
 ### TEEGRIS / Samsung crypto startup
