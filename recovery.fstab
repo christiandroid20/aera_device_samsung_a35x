@@ -37,9 +37,9 @@ odm                                 /odm              ext4      ro,barrier=1,dis
 # =========================
 # EXTERNAL STORAGE
 # =========================
-/external_sd  /dev/block/mmcblk0p1  vfat  nosuid,nodev,dirsync,noatime  wait
+/dev/block/mmcblk0p1  /external_sd  vfat  nosuid,nodev,dirsync,noatime  defaults
 
 # =========================
 # USB OTG
 # =========================
-/usb-otg  auto  auto  defaults  defaults
+/dev/block/sdf1  /usb-otg  auto  defaults  defaults
