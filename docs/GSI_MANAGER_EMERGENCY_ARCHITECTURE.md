@@ -77,3 +77,35 @@ Therefore, implement read-only Emergency diagnostics and snapshot-based manual r
 7. Test Emergency diagnostics and restore plans with synthetic failed-boot markers and verified snapshots before enabling any automatic trigger.
 
 Current status: comparison and architecture audit in progress; no AERA image has been built or boot-tested from this repository.
+
+
+## Implementation progress on `aera-16.0-work`
+
+### Device-tree corrections already staged
+
+- Added `aera_a35x.mk` and inherited it from `device.mk`; aligned the makefile traversal with current AERA device-tree examples.
+- Corrected `PRODUCT_SHIPPING_API_LEVEL` and `BOARD_SHIPPING_API_LEVEL` to 34, consistent with the A35X launch platform.
+- Kept `PRODUCT_TARGET_VNDK_VERSION := 33` provisionally. No actual `ro.vndk.version` value has been supplied from the installed U4 vendor, so this must be checked before calling the build configuration final.
+- Rebased BoardConfig settings on the AERA16 reference while preserving the A35X 4 KiB kernel page size, boot header v2, known recovery image limit and LZ4-disabled ramdisk setting. The dynamic logical partition list now includes `system_dlkm`.
+- Removed the hardcoded 2099 security patch placeholder and the stale fixed vendor patch value. The secure services must use the real OS/security-patch properties of the installed ROM.
+- Enabled AERA's existing Root Manager through its guarded device-specific packaging option; no second Root Manager page was added.
+- Corrected TEEGRIS initialization ordering: the TEE RC import now occurs after the A35X `/dev/block/by-name` symlinks are created. EFS mounts are non-blocking. KeyMint, Gatekeeper and FKeymaster now have one explicit, disabled-until-ready service definition and start only after TEEGRIS/TEE-TS readiness.
+- Removed duplicate vendor init service RC declarations for TEEGRIS, KeyMint, Gatekeeper and FKeymaster while preserving the service binaries and the separate PA/TUI RC files. FKeymaster's service declaration is retained in the ordered recovery RC.
+- Moved `extract_ta.sh` from `/vendor/bin` to executable `/sbin/extract_ta.sh`, so mounting the real vendor over `/vendor` cannot hide the validator.
+
+### Native Home apps now have a source prototype
+
+- Added a shared Host API 2 worker source and manifests for **GSI MANAGER** and **EMERGENCY MODE**.
+- Added a cross-build/packaging script that uses the AERA AArch64 musl sysroot and creates the verified `AERAWEB1` runtime payloads.
+- Added an init action to seed the two locally bundled packages into `/tmp/aera/plugins` after AERA mounts its tmpfs. The Home plugin grid can then discover them without changing the shared recovery core.
+- Both apps are intentionally read-only in this prototype. GSI image inspection checks the image header, file size and SHA-256; partition/super inventory and Samsung service checks are read-only. Emergency Mode reports boot properties, pstore, filesystem mount/free-space state, secure-service status and recovery-log presence.
+- ROM customization, GApps injection, EROFS/EXT4 rebuilding, image export, snapshot creation/restoration, boot patching, automatic rollback and bootloop-triggered reboot remain disabled or informational. No write-to-block-device, format, wipe or reboot command is present in the worker source.
+- AERA runs Host API 2 workers as root without a sandbox. The current source therefore stays deliberately narrow. The local packages will be labelled Unofficial by AERA; no signature policy or project signing key is changed.
+
+### Still required before a recovery build can be called ready
+
+1. Build both plugin workers using `bash device/samsung/a35x/plugins/build_plugins.sh` in the synced AERA16 tree. The source has not yet been cross-compiled.
+2. Confirm the actual `ro.vndk.version` and `ro.vendor.api_level` from the installed U4 Android 15 system; update the provisional VNDK target only from those values.
+3. Verify the A35X brightness sysfs path and maximum range against the known-good A16 recovery or a live read-only sysfs listing.
+4. Run the AERA build and inspect the final ramdisk to confirm the two runtime packages and init copy action are present. No recovery image has been built or tested from this branch yet.
+5. Static-check the final merged init RC import order, TEE service declarations, USB gadget triggers, fstab, and image size before any device test.
