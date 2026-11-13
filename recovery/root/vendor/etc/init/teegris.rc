@@ -1,0 +1,11 @@
+# A35x recovery: TEEGRIS startup is owned by
+# /init.recovery.teegris.rc.
+#
+# Do not start tz_service here or wait_for_prop for vendor.tzdaemon /
+# vendor.tzts_daemon. The recovery init file starts these daemons in a
+# non-blocking, property-triggered sequence after trustlet extraction.
+# Keeping the old post-fs wait_for_prop sequence here can block init before
+# the recovery UI is launched when a TEE daemon never reaches Ready.
+
+on post-fs-data
+    mkdir /data/vendor/tee 0700 system system
