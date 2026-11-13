@@ -126,3 +126,8 @@ The TEE init intentionally creates the standard KeyMint/TEE runtime directories 
 
 
 The A35X USB gadget controller is explicitly set to `13200000.dwc3` in the replacement USB RC, matching the value observed in the prior recovery property dump. ADB/MTP/fastbootd still require independent testing in the AERA image.
+
+
+### Legacy image-build rule
+
+The root-level Android 12.1/TWRP `mkbootimg.mk` was not referenced by the active AERA device product files and was absent from the AERA16 reference tree. It has been moved to `docs/legacy/mkbootimg_android12.1.mk` so it cannot accidentally override AERA 16.0 recovery-image packaging. The active tree keeps only the device-specific `BOARD_MKBOOTIMG_ARGS` and partition geometry.
