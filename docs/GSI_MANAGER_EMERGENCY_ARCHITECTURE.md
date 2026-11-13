@@ -109,3 +109,17 @@ Current status: comparison and architecture audit in progress; no AERA image has
 3. Verify the A35X brightness sysfs path and maximum range against the known-good A16 recovery or a live read-only sysfs listing.
 4. Run the AERA build and inspect the final ramdisk to confirm the two runtime packages and init copy action are present. No recovery image has been built or tested from this branch yet.
 5. Static-check the final merged init RC import order, TEE service declarations, USB gadget triggers, fstab, and image size before any device test.
+
+
+## Additional fstab review
+
+The current AERA fstab matches the separate AERA16 A35X reference and deliberately mounts EFS through the ordered TEE init rather than starting it directly from fstab. Compared with TeamWin14/16, it also includes both EROFS and EXT4 fallbacks for the logical partitions and includes `system_dlkm`.
+
+Two storage lines still need validation against the actual A35X device nodes before relying on removable storage:
+
+- The `external_sd` entry currently places `/external_sd` in the source column and `/dev/block/mmcblk0p1` in the mount-point column. That appears reversed for a standard Android fstab.
+- The `/usb-otg auto auto defaults defaults` entry is nonstandard and should be checked against AERA's fstab parser and the A35X USB-OTG device node.
+
+They are left unchanged pending a real device-node check. The AERA fstab also does not declare `keydata` or `keyrefuge`; do not add guessed partition names without a verified PIT/by-name listing.
+
+The TEE init intentionally creates the standard KeyMint/TEE runtime directories under `/data/vendor` and the EFS DAK directory, then applies their expected ownership/contexts. These are narrowly scoped vendor-service setup operations; they are not a userdata format, wipe or image restore. The GSI/Emergency plugin workers themselves remain read-only.
