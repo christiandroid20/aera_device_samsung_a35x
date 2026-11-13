@@ -14,9 +14,9 @@ PRODUCT_TARGET_VNDK_VERSION := 33 # TODO: verify against ro.vndk.version from th
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
 
 # Samsung KeyMint hardware properties, kept as product vendor properties.
-PRODUCT_VENDOR_PROPERTIES += \\
-    ro.security.keystore.keytype=sakv2,gak,rkp \\
-    ro.hardware.keystore=mdfpp \\
+PRODUCT_VENDOR_PROPERTIES += \
+    ro.security.keystore.keytype=sakv2,gak,rkp \
+    ro.hardware.keystore=mdfpp \
     ro.hardware.keystore_desede=true
 
 TARGET_SCREEN_WIDTH := 1080
