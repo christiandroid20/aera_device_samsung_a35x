@@ -1,0 +1,33 @@
+import /init.recovery.teegris.rc
+
+# Restore the A35x startup sequence from the known-booting recovery image.
+# Keep the configfs properties needed for a later USB/ADB diagnostic pass.
+
+on early-init
+    mkdir /mnt/vendor/efs 0771 radio system
+    # No ocultar /vendor/tee: extract_ta.sh valida los TA del vendor real montado por first-stage.
+    start extract_ta
+
+on late-init
+    setprop sys.usb.controller 13200000.dwc3
+    setprop service.adb.root 1
+    setprop sys.usb.configfs 1
+    setprop sys.usb.config adb
+
+on fs
+    wait /dev/block/platform/${ro.boot.boot_devices}
+    symlink /dev/block/platform/${ro.boot.boot_devices} /dev/block/bootdevice
+    symlink /dev/block/platform/${ro.boot.boot_devices}/by-name /dev/block/by-name
+    symlink /dev/block/platform/${ro.boot.boot_devices}/by-name/param /dev/block/param
+    chown root system /dev/block/param
+    chmod 0666 /dev/block/param
+
+on boot
+    start health-hal-2-1
+
+service extract_ta /vendor/bin/extract_ta.sh
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0

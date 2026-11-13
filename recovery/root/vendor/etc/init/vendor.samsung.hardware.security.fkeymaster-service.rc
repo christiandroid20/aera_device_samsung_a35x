@@ -1,0 +1,10 @@
+# Samsung FKeymaster AIDL HAL.
+# Keep a single service declaration. Start only after both TEEGRIS daemons
+# have completed initialization; this avoids racing the secure-world setup.
+service vendor.fkeymaster-default /vendor/bin/vendor.samsung.hardware.security.fkeymaster-service
+    interface aidl vendor.samsung.hardware.security.fkeymaster.ISehFkeymaster/default
+    class early_hal
+    user system
+    group system
+    disabled
+
