@@ -131,3 +131,5 @@ The A35X USB gadget controller is explicitly set to `13200000.dwc3` in the repla
 ### Legacy image-build rule
 
 The root-level Android 12.1/TWRP `mkbootimg.mk` was not referenced by the active AERA device product files and was absent from the AERA16 reference tree. It has been moved to `docs/legacy/mkbootimg_android12.1.mk` so it cannot accidentally override AERA 16.0 recovery-image packaging. The active tree keeps only the device-specific `BOARD_MKBOOTIMG_ARGS` and partition geometry.
+
+The prior A35X recovery property dump reports `ro.hardware=s5e8835`, confirming that `init.recovery.s5e8835.rc` is the matching device-init filename. The same recovery evidence reports the USB controller as `13200000.dwc3`; both values are reflected in the working branch.
