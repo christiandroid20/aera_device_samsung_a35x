@@ -335,8 +335,8 @@ static void scan_partitions(struct Page *p, const char *dir, const char *section
     closedir(d);
 }
 static void render_partitions(void) {
-    struct Page p; page_init(&p, "PARTITION / SUPER MAP",
-        "Read-only inventory of physical by-name and logical mapper devices. No partition is written.");
+    struct Page p; page_init(&p, "PARTITION INVENTORY",
+        "Read-only physical by-name and logical mapper inventory. Super metadata parsing is not enabled yet.");
     scan_partitions(&p, "/dev/block/by-name", "Physical / by-name");
     scan_partitions(&p, "/dev/block/mapper", "Logical / mapper");
     add_back(&p); publish_page(&p);
@@ -347,7 +347,7 @@ static void metric_prop(struct Page *p, const char *label, const char *key) {
 }
 static void render_compat(void) {
     struct Page p; page_init(&p, "SAMSUNG COMPATIBILITY",
-        "Read-only checks. The installed Samsung vendor remains the hardware base.");
+        "Read-only recovery/vendor properties and secure-service state. Full HAL, VINTF and SELinux comparison is not enabled yet.");
     add_section(&p, "Device / Android");
     metric_prop(&p, "Device", "ro.product.device");
     metric_prop(&p, "Model", "ro.product.model");
@@ -402,8 +402,8 @@ static void render_gsi_home(void) {
     struct Page p; page_init(&p, "GSI MANAGER",
         "A35X ROM workshop. Samsung vendor stays in place. Inspection is read-only in this bring-up.");
     add_action(&p, 10, "Import & inspect image", "Choose a system image, inspect format, size and SHA-256", PRIMARY);
-    add_action(&p, 20, "Partition / super map", "Inspect physical and logical partition devices", 0);
-    add_action(&p, 30, "Samsung compatibility", "Review Android, VNDK and secure-service properties", 0);
+    add_action(&p, 20, "Partition inventory", "Read-only physical/logical devices; super metadata parser pending", 0);
+    add_action(&p, 30, "Samsung compatibility", "Review loaded Android/vendor properties and secure-service state", 0);
     add_action(&p, 40, "ROM snapshots", "Find existing working copies and snapshot folders", 0);
     add_action(&p, 50, "Root & boot inspection", "Read-only boot status; existing Root Manager remains separate", 0);
     add_action(&p, 60, "ROM customization", "Staging, GApps injection and filesystem conversion are not enabled yet", DISABLED);
@@ -414,7 +414,7 @@ static void render_emergency_home(void) {
     struct Page p; page_init(&p, "EMERGENCY MODE",
         "A35X recovery diagnostics. No userdata wipe, automatic restore or boot-chain write is performed.");
     add_action(&p, 110, "Boot reason & Android build", "Read bootloader-reported reason and build properties", PRIMARY);
-    add_action(&p, 120, "Pstore / kernel evidence", "List persistent kernel logs and last_kmsg if available", 0);
+    add_action(&p, 120, "Pstore / kernel evidence", "List pstore records and check last_kmsg availability", 0);
     add_action(&p, 130, "Filesystem health", "Check mount state and free space without modifying files", 0);
     add_action(&p, 140, "TEE & decryption status", "Inspect TEEGRIS, KeyMint, Gatekeeper and FKeymaster state", 0);
     add_action(&p, 150, "ROM snapshots", "Find available recovery points; no restore is triggered", 0);
@@ -424,7 +424,7 @@ static void render_emergency_home(void) {
 }
 static void render_boot_reason(void) {
     struct Page p; page_init(&p, "BOOT REASON & BUILD",
-        "These properties are evidence, not a persistent count of failed boots.");
+        "These properties describe the current recovery boot; they are not a saved record of the previous Android boot.");
     add_section(&p, "Bootloader / build");
     metric_prop(&p, "Boot reason", "ro.boot.bootreason");
     metric_prop(&p, "Bootloader", "ro.bootloader");
