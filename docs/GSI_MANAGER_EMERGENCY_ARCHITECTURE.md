@@ -115,11 +115,11 @@ Current status: comparison and architecture audit in progress; no AERA image has
 
 The current AERA fstab matches the separate AERA16 A35X reference and deliberately mounts EFS through the ordered TEE init rather than starting it directly from fstab. Compared with TeamWin14/16, it also includes both EROFS and EXT4 fallbacks for the logical partitions and includes `system_dlkm`.
 
-Two storage lines still need validation against the actual A35X device nodes before relying on removable storage:
+The original AERA fstab had two removable-storage entries in the wrong source/mount-point order. Prior A35X recovery logs confirmed that the old `external_sd` line was parsed as an invalid block device, and the previous working TWRP flags identified the actual removable sources. The work branch now uses:
 
-- The `external_sd` entry currently places `/external_sd` in the source column and `/dev/block/mmcblk0p1` in the mount-point column. That appears reversed for a standard Android fstab.
-- The `/usb-otg auto auto defaults defaults` entry is nonstandard and should be checked against AERA's fstab parser and the A35X USB-OTG device node.
+- `/dev/block/mmcblk0p1 /external_sd vfat ...` for the microSD card.
+- `/dev/block/sdf1 /usb-otg auto ...` for the USB-OTG device.
 
-They are left unchanged pending a real device-node check. The AERA fstab also does not declare `keydata` or `keyrefuge`; do not add guessed partition names without a verified PIT/by-name listing.
+Neither entry uses a blocking `wait` flag, so missing removable media cannot hold recovery startup. These are based on the prior A35X recovery observations and still need a mount test in the AERA image. The AERA fstab does not declare `keydata` or `keyrefuge`; do not add guessed partition names without a verified PIT/by-name listing.
 
 The TEE init intentionally creates the standard KeyMint/TEE runtime directories under `/data/vendor` and the EFS DAK directory, then applies their expected ownership/contexts. These are narrowly scoped vendor-service setup operations; they are not a userdata format, wipe or image restore. The GSI/Emergency plugin workers themselves remain read-only.
