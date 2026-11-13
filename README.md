@@ -34,7 +34,7 @@ The 4 KiB page size and header v2 are retained as the A35X baseline. The TeamWin
 - Added `aera_a35x.mk` and inherited it from `device.mk`.
 - Set the shipping API level to 34, matching the A35 launch platform.
 - Kept `PRODUCT_TARGET_VNDK_VERSION := 33` provisional until the installed vendor's actual `ro.vndk.version` is checked.
-- Removed the fake 2099 security-patch placeholder and stale fixed vendor patch value. KeyMint must see the actual installed OS/security-patch properties.
+- Removed the fake 2099 security-patch placeholder. The 2025-04-01 patch value remains in vendor.prop because Samsung's U4BYDC release listing reports that security patch level; verify the mounted vendor's own patch property before finalizing.
 - Enabled AERA's existing Root Manager using the device-specific packaging flag. No duplicate Root Manager entry is added.
 - Kept the A35X dynamic partition map, including `system_dlkm`.
 
