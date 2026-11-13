@@ -1,4 +1,3 @@
-import /init.recovery.teegris.rc
 
 # Restore the A35x startup sequence from the known-booting recovery image.
 # Keep the configfs properties needed for a later USB/ADB diagnostic pass.
@@ -25,9 +24,13 @@ on fs
 on boot
     start health-hal-2-1
 
-service extract_ta /vendor/bin/extract_ta.sh
+service extract_ta /sbin/extract_ta.sh
     user root
     group root
     disabled
     oneshot
     seclabel u:r:recovery:s0
+
+# Importar TEEGRIS después de preparar /dev/block/by-name en el evento fs.
+# Evita que el wait de efs/sec_efs se ejecute antes de crear los symlinks.
+import /init.recovery.teegris.rc
