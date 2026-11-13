@@ -306,7 +306,7 @@ static void render_image_result(const char *path) {
             add_metric(&p, "SHA-256", "sha256sum is unavailable in this recovery build", METRIC_WARNING);
         add_metric(&p, "Selected path", path, 0);
     }
-    add_back(&p); current_page = PAGE_IMPORT; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void scan_partitions(struct Page *p, const char *dir, const char *section) {
     DIR *d = opendir(dir);
@@ -334,7 +334,7 @@ static void render_partitions(void) {
         "Read-only inventory of physical by-name and logical mapper devices. No partition is written.");
     scan_partitions(&p, "/dev/block/by-name", "Physical / by-name");
     scan_partitions(&p, "/dev/block/mapper", "Logical / mapper");
-    add_back(&p); current_page = PAGE_PARTITIONS; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void metric_prop(struct Page *p, const char *label, const char *key) {
     char value[256];
@@ -361,7 +361,7 @@ static void render_compat(void) {
     metric_prop(&p, "Gatekeeper", "init.svc.vendor.gatekeeper-1-0");
     metric_prop(&p, "FKeymaster", "init.svc.vendor.fkeymaster-default");
     add_metric(&p, "Real vendor dm-4 mounted", real_vendor_dm4_mounted() ? "Yes" : "No / not verified", real_vendor_dm4_mounted() ? METRIC_GOOD : METRIC_WARNING);
-    add_back(&p); current_page = PAGE_COMPAT; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void render_snapshots(void) {
     struct Page p; page_init(&p, "ROM SNAPSHOTS",
@@ -378,7 +378,7 @@ static void render_snapshots(void) {
             snprintf(value, sizeof(value), "Not found · %s", paths[i]);
         add_metric(&p, i < 2 ? "Storage path" : "Data path", value, 0);
     }
-    add_back(&p); current_page = PAGE_SNAPSHOTS; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void render_root(void) {
     struct Page p; page_init(&p, "ROOT & BOOT INSPECTION",
@@ -390,7 +390,7 @@ static void render_root(void) {
     add_metric(&p, "Automatic boot patch", "Disabled", METRIC_GOOD);
     add_metric(&p, "Manual patching", "Use AERA Root Manager / approved manual workflow", 0);
     add_metric(&p, "Write protection", "No boot write operation exists in this prototype", METRIC_GOOD);
-    add_back(&p); current_page = PAGE_ROOT; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void render_gsi_home(void) {
     struct Page p; page_init(&p, "GSI MANAGER",
@@ -427,7 +427,7 @@ static void render_boot_reason(void) {
     metric_prop(&p, "Verified boot", "ro.boot.verifiedbootstate");
     metric_prop(&p, "Android release", "ro.build.version.release");
     metric_prop(&p, "Build fingerprint", "ro.build.fingerprint");
-    add_back(&p); current_page = PAGE_BOOT; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void render_pstore(void) {
     struct Page p; page_init(&p, "PSTORE / KERNEL EVIDENCE",
@@ -448,7 +448,7 @@ static void render_pstore(void) {
     struct stat st;
     if (stat("/proc/last_kmsg", &st) == 0) add_metric(&p, "last_kmsg", "Present", METRIC_GOOD);
     else add_metric(&p, "last_kmsg", "Unavailable", 0);
-    add_back(&p); current_page = PAGE_PSTORE; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void render_filesystems(void) {
     struct Page p; page_init(&p, "FILESYSTEM HEALTH",
@@ -467,7 +467,7 @@ static void render_filesystems(void) {
         } else copy_text(value, sizeof(value), "Unavailable");
         add_metric(&p, paths[i], value, mount_present(paths[i]) ? METRIC_GOOD : METRIC_WARNING);
     }
-    add_back(&p); current_page = PAGE_FILESYSTEMS; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void render_crypto(void) {
     struct Page p; page_init(&p, "TEE & DECRYPTION STATUS",
@@ -483,7 +483,7 @@ static void render_crypto(void) {
     metric_prop(&p, "KeyMint", "init.svc.vendor.keymint-default");
     metric_prop(&p, "Gatekeeper", "init.svc.vendor.gatekeeper-1-0");
     metric_prop(&p, "FKeymaster", "init.svc.vendor.fkeymaster-default");
-    add_back(&p); current_page = PAGE_CRYPTO; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void render_logs(void) {
     struct Page p; page_init(&p, "RECOVERY LOGS",
@@ -496,13 +496,13 @@ static void render_logs(void) {
             add_metric(&p, logs[i], value, METRIC_GOOD);
         } else add_metric(&p, logs[i], "Unavailable", 0);
     }
-    add_back(&p); current_page = PAGE_LOGS; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void render_import_page(void) {
     struct Page p; page_init(&p, "IMPORT & INSPECT",
         "Select an image for read-only inspection. The image is not mounted, flashed or modified.");
     add_action(&p, 11, "Choose image file", "Supported: .img, .zip, .xz and .bin", PRIMARY);
-    add_back(&p); current_page = PAGE_IMPORT; publish_page(&p);
+    add_back(&p); publish_page(&p);
 }
 static void render_current_home(void) {
 #if defined(APP_GSI)
@@ -559,7 +559,7 @@ int main(void) {
             if (msg.flags == 1 && msg.text[0]) render_image_result(msg.text);
             else {
                 struct Page p; page_init(&p, "IMPORT & INSPECT", "File selection was cancelled or unavailable.");
-                add_back(&p); current_page = PAGE_IMPORT; publish_page(&p);
+                add_back(&p); publish_page(&p);
             }
 #endif
         } else if (msg.kind == LIFECYCLE && msg.value == STOP) {
